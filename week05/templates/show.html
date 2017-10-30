@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+   <head>
+      <title> COMP1531 practice bubble </title>
+   </head>
+   <body>
+      <h2> Sorting process </h2>
+      {% if all_changes %}
+      <table>
+         <tr>
+            <th> All iterations of bubble sort </th>
+         </tr>
+         {% for change in all_changes %}
+         <tr>
+            <td>
+               {{ change }}
+            </td>
+         </tr>
+         {% endfor %}
+      </table>
+      {% else %}
+      <h4> There is nothing to show </h4>
+      {% endif %}
+   </body>
+</html>
