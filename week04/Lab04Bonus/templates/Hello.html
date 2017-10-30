@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+   <head>
+   <title>Hello page</title>
+   </head>
+   <body>
+       {% if all_users %}
+       {% for user in all_users %}
+       <h1> Hi, <a href="{{url_for('details',name=user[0])}}">{{user[0]}}</a></h1>
+      {% endfor %}
+      {%else%}
+      No students to show
+      {% endif %}
+   </body>
+   </html>

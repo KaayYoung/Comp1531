@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+   <head>
+   <title>Details page</title>
+   </head>
+   <body>
+       {% if details %}
+       <h1> Details of {{ details[0] }} </h1>
+       <h3> zID : {{ details[1] }}</h1>
+       <h3> Description : {{ details[2] }}</h1>
+      {%else%}
+      No students to show
+      {% endif %}
+   </body>
+   </html>
