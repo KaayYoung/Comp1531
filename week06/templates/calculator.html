@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+   <head>
+      <link rel="stylesheet" type="text/css" href="static/design.css" />
+   </head>
+   <title> Calculator page </title>
+   <body>
+      <div id="calculator">
+         <p id="display">{{ display }}</p>
+         {% for row_actions in actions | batch(4) %}
+            {% for action in row_actions %}
+               <form class="keys_form" action="{{ url_for('calculator_action', action=action) }}">
+                  <input class="keys" type="submit" value="{{ action }}">
+               </form>
+            {% endfor %}
+            <br>
+         {% endfor %}
+      </div>
+   </body>
+</html>

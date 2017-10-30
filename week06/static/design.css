@@ -1,0 +1,19 @@
+
+#display
+{	
+	width: 308px;	
+	height: 60px;
+	font: 25px bold;
+}
+
+.keys_form
+{
+	display: inline-block;
+}
+
+.keys
+{
+	width: 75px;
+	height: 70px;
+	margin-left: 0px;
+}

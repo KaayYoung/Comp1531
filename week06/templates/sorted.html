@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+   <head>
+   <title>Hello page</title>
+   </head>
+   <body>
+      <h1> Sorting Process </h1>
+
+      <h1> All Iterations of the bubble sort </h1>
+      {% if all_iteration %}
+      {% for iteration in all_iteration %}
+      <h1> {{iteration}} </h1>
+      {% endfor %}
+      {%else%}
+      No change
+      {% endif %}
+   </body>
+   </html>
