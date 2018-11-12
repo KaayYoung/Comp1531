@@ -1,0 +1,43 @@
+<ul id="slide-out" class="side-nav">
+  <li><div class="user-view" style="text-shadow: 0px 1px 1px #000,0px 0px 5px #000;">
+    <div class="background">
+      <!-- <img src="{{ url_for('static',filename='img/banner-wide.jpg') }}" style="max-width:auto; height:100%;left:-30%;position: absolute;"> -->
+      <img src="{{ url_for('static',filename='img/banner-sci.jpg') }}" style="max-height:auto; width:100%;left:-0%;position: absolute;">
+    </div>
+    <a href="#!user"><img class="circle" src="{{ url_for('static',filename='img/logo.jpg') }}"></a>
+    <a href="#!name"><span class="white-text name">{{current_user.name}}</span></a>
+    <a href="#!email"><span class="white-text email">{{current_user.id}}@unsw.edu.au</span></a>
+  </div></li>
+
+  <li><a class="waves-effect" href="{{ url_for('dashboard.dashboard') }}"><i class="material-icons">home</i>Home</a></li>
+  <li><a class="waves-effect" href="{{ url_for('debug.debug') }}"><i class="material-icons">build</i>Debug</a></li>
+
+  <li><div class="divider"></div></li>
+  <li><a class="subheader">Surveys</a></li>
+  <li><a class="waves-effect" href="{{ url_for('survey_setup.survey_setup') }}"><i class="material-icons">create</i>Survey creation</a></li>
+  <li><a class="waves-effect" href="{{ url_for('survey_manage.survey_manage') }}"><i class="material-icons">dashboard</i>Survey management</a></li>
+  <li><a class="waves-effect" href="{{ url_for('metrics.metrics') }}"><i class="material-icons">data_usage</i>Survey results</a></li>
+
+  <li><div class="divider"></div></li>
+  <li><a class="subheader">Questions</a></li>
+  <li><a class="waves-effect" href="{{ url_for('questions.questions') }}"><i class="material-icons">comment</i>Question pool</a></li>
+
+  <!-- Dropdown options -->
+  <!-- <li class="no-padding">
+    <ul class="collapsible collapsible-accordion">
+      <li>
+        <a class="collapsible-header">Dropdown<i class="material-icons">arrow_drop_down</i></a>
+        <div class="collapsible-body">
+          <ul>
+            <li><a href="#!">First</a></li>
+            <li><a href="#!">Second</a></li>
+            <li><a href="#!">Third</a></li>
+            <li><a href="#!">Fourth</a></li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </li> -->
+</ul>
+<!-- Navigation trigger -->
+<a class='left waves-effect btn-flat button-collapse' data-activates="slide-out"><i class="material-icons">menu</i></a>  

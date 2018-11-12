@@ -1,0 +1,46 @@
+<header>
+  <div class="container">
+    {% if current_user.is_anonymous %}
+      <!-- Authorised indicator -->
+      <a class='right waves-effect btn-flat tooltipped' data-position="bottom" data-delay="0" data-tooltip="Unsecured"><i class="material-icons">lock_open</i></a>
+    {% else %}
+      <!-- Navigation slideout -->
+      {% if current_user.admin %}
+        {% include "nav-admin.html" %}
+      {% elif current_user.staff %}
+        {% include "nav-staff.html" %}
+      {% else %}
+        {% include "nav-student.html" %}
+      {% endif %}
+
+
+      <!-- Logout trigger -->
+      <a class='dropdown-button right btn-flat tooltipped' href='#' data-activates='logout-dropdown' data-beloworigin="false" data-position="bottom" data-delay="0" data-tooltip="{{current_user.id}}"><i class="material-icons">lock</i></a>
+
+      <!-- Logout dropdown structure -->
+      <ul id='logout-dropdown' class='dropdown-content'>
+        <li><a href="/logout">Log Out</a></li>
+      </ul>
+    {% endif %}
+  </div>
+</header>
+<div class="divider"></div>
+
+<!-- Nav slideout initializer -->
+<script>
+  // Initialize collapse button
+  $(".button-collapse").sideNav();
+  // Initialize collapsible (uncomment the line below if you use the dropdown variation)
+  // $('.collapsible').collapsible();
+</script>
+
+<!-- Flask flash system -->
+<script>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        Materialize.toast($('<i class=\'material-icons left\'>{{ category }}</i><a href=\'#!\' class=\'white-text\'>{{ message }}</a>'), 10000);
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</script>

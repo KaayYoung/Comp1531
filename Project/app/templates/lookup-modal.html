@@ -1,0 +1,43 @@
+<!-- Modal Structure -->
+<div id="lookup" class="modal bottom-sheet" style="width: 85%; height: 50vw; margin: auto;">
+  <div class="progress" id="lookup_loader" style="z-index: 1000; position: absolute;">
+    <div class="indeterminate"></div>
+  </div>
+  <div class="modal-content" style="padding: 0px; height: 100%; width: 85%; margin: auto;">
+    <iframe id="lookup_iframe" width="100%" height="100%" frameborder="0"></iframe>
+  </div>
+</div>
+<script>
+  $(document).ready(function() {
+    // the "href" attribute of the modal trigger must specify the modal ID that wants to be triggered
+    $('.modal').modal({
+
+    });
+
+    // $('.modal').modal({
+    //     dismissible: true, // Modal can be dismissed by clicking outside of the modal
+    //     opacity: .5, // Opacity of modal background
+    //     inDuration: 300, // Transition in duration
+    //     outDuration: 200, // Transition out duration
+    //     startingTop: '4%', // Starting top style attribute
+    //     endingTop: '10%', // Ending top style attribute
+    //     ready: function(modal, trigger) { // Callback for Modal open. Modal and trigger parameters available.
+    //       alert("Ready");
+    //       console.log(modal, trigger);
+    //     },
+    //     complete: function() { alert('Closed'); } // Callback for Modal close
+    //   }
+    // );
+
+    $('#lookup_iframe').on('load', function() {
+      $('#lookup_loader').css("visibility", "hidden");
+      $('#lookup_iframe').css("visibility", "visible");
+    });
+  });
+
+  $("#lookup_btn").click(function() {
+    if(!$('#lookup_iframe').attr('src')) {
+      $('iframe#lookup_iframe').attr('src', '{{url_for('lookup.lookup')}}');
+    }
+  });
+</script>

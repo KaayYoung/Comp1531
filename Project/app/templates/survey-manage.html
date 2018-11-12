@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+  <head>
+  <title>Survey management</title>
+  {% include "head.html" %}
+  <style>
+    .collection {
+      overflow: visible;
+    }
+    .collapsible .collapsible {
+      margin: 0;
+    }
+    .collapsible-header.active i {
+      -ms-transform: rotate(180deg); /* IE 9 */
+      -webkit-transform: rotate(180deg); /* Chrome, Safari, Opera */
+      transform: rotate(180deg);
+    }
+    .course { 
+      -moz-transition: all .2s ease-in;
+      -o-transition: all .2s ease-in;
+      -webkit-transition: all .2s ease-in;
+      transition: all .2s ease-in;
+      padding: 20px;
+    }
+    .course.active {
+      background: #eee;
+    }
+  </style>
+  </head>
+  <body>
+
+    {% include "header.html" %}
+
+    <main>
+      <div class="container">
+        <h1 class="page-title"> Survey management </h1>
+
+
+        <ul class="collapsible popout" data-collapsible="accordion">
+          {% for course in courses|sort(attribute='name') %}
+            <li>
+              <div class="collapsible-header{%if loop.index==1%} active{%endif%} course " id="{{course}}">{{ course.name }}</div>
+              {% if course.offerings %}
+              {% for offering in course.offerings|sort(attribute='semester') %}
+                <div class="collapsible-body no-padding">
+                  <ul class="collapsible z-depth-0" data-collapsible="accordion" style="border: none;">
+                    <li>
+                      <div class="collapsible-header" id="{{course.name}}{{offering.semester}}" style="border: none;">
+                        <i class="material-icons">expand_more</i>
+                        {{ offering.semester }}
+                      </div>
+                      <div class="collapsible-body no-padding" style="border: none;">
+                        {% if offering.surveys %}
+                        {% for survey in offering.surveys %}
+                          <Form method="POST" id="permissions-{{survey.id}}">
+                          <ul class="collection">
+                            <a href="{{url_for('survey_review.survey_review', course=survey.offering.course_name, offering=survey.offering.semester, id=survey.id)}}" class="collection-item">
+                              {{ survey.title }}
+                              <i class="material-icons dropdown-button right" data-activates="dropdown-{{survey.id}}" data-beloworigin="false">more_vert</i>
+                              {% if survey.phase != 'create' and survey.phase != 'review' %}
+                                <!-- Switch for survey permissions -->
+                                <div class="switch right tooltipped" data-position="left" data-delay="0" data-tooltip="{%if survey.phase=='open'%}open{%else%}closed{%endif%}">
+                                  <label>
+                                    <input value = "{{survey.id}}" type="hidden" name="survey-permissions">
+                                    
+                                    <input type="checkbox" {%if survey.phase=='open'%}checked="checked"{%endif%} name="survey-permissions" onclick="clickHandler('permissions-{{survey.id}}',1000);">
+                                    <span class="lever"></span>
+                                  </label>
+                                </div>
+                              {% else %}
+                                <i class="material-icons right tooltipped" data-position="left" data-delay="0" data-tooltip="Under review">build</i>
+                              {% endif %}
+                            </a>
+                          </ul>
+                          <ul id="dropdown-{{survey.id}}" class='dropdown-content'>
+                            <li><a href="#!">Edit</a></li>
+                            <Form method="POST" id="form-{{survey.id}}">
+                              <input value = "{{survey.id}}" type="hidden" name="survey-to-delete">
+                              <li><a href="#!" onclick="document.getElementById('form-{{survey.id}}').submit();">Delete</a></li>
+                            </Form>
+                          </ul>
+                        </Form>
+                        {% endfor %}
+                        {% else %}
+                          <ul class="collection">
+                            <a href="{{url_for('survey_setup.survey_setup', predetermined_course_name=course.name, predetermined_course_offering=offering.semester)}}" class="collection-item">Add new survey</a>
+                          </ul>
+                        {% endif %}
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              {% endfor %}
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+
+
+      </div>
+    </main>
+
+    <p>
+    {% include "footer.html" %}
+
+  </body>
+
+</html>

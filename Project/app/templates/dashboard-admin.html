@@ -1,0 +1,199 @@
+<!doctype html>
+<html>
+  <head>
+  <title>Dashboard</title>
+  {% include "head.html" %}
+  <style>
+    .collection {
+      overflow: visible;
+    }
+    .collapsible .collapsible {
+      margin: 0;
+    }
+    .collapsible-header.active i {
+      -ms-transform: rotate(180deg); /* IE 9 */
+      -webkit-transform: rotate(180deg); /* Chrome, Safari, Opera */
+      transform: rotate(180deg);
+    }
+    .course { 
+      -moz-transition: all .2s ease-in;
+      -o-transition: all .2s ease-in;
+      -webkit-transition: all .2s ease-in;
+      transition: all .2s ease-in;
+      padding: 20px;
+    }
+    .course.active {
+      background: #eee;
+    }
+  </style>
+  </head>
+  <body>
+
+    {% include "header.html" %}
+
+    <main>
+      <div class="container">
+        <h1 class="page-title"> Dashboard </h1>
+        <!-- <div class="divider"></div> -->
+        <!-- <h2 class="header"> User management </h2> -->
+        <a href="{{url_for('survey_setup.survey_setup')}}" class="waves-effect waves-light btn">Create survey</a>
+        <!-- <a href="{{url_for('survey_manage.survey_manage')}}" class="waves-effect waves-light btn">Manage surveys</a> -->
+        <a href="{{url_for('questions.questions')}}" class="waves-effect waves-light btn">Question pool</a>
+
+        <p><div class="divider"></div></p>
+        <div class="section">
+          <h2> Guest users </h2>
+          {% if guests %}
+
+          <div class="row" style="font-weight: bold; font-size: 15px; padding-left: 10px;">
+            <div class="col s4" style="padding-left: 20px;">
+              zID
+            </div>
+            <div class="col s6" style="padding-left: 10px;">
+              Requested course-offering
+            </div>
+          </div>
+          <div class="collection">
+            {% for user in guests %}
+              <a href="#!" class="collection-item">
+                <div class="valign-wrapper row" style="margin-bottom: 0px">
+                  <div class="col s4">
+                    {{ user.id }}
+                  </div>
+                  <div class="col s6">
+                    {{ user.offering.course_name }}-{{ user.offering.semester }}
+                  </div>
+
+                  <div class="col s2">
+                    <!-- Switch for user permissions -->
+                    {%if user.id!=current_user.id%}
+                      <div class="switch tooltipped left" data-position="left" data-delay="0" data-tooltip="{%if user.active%}active{%else%}inactive{%endif%}">
+                        <label>
+                        <Form method="POST" id="permissions-{{user.id}}">
+                          <input value = "{{user.id}}" type="hidden" name="user-to-promote">
+                          
+                          <input type="checkbox" {%if user.active%}checked="checked"{%endif%} name="user-permissions" onclick="clickHandler('permissions-{{user.id}}',1000);">
+                          <span class="lever"></span>
+                        </Form>
+                        </label>
+                      </div>
+                    {%endif%}
+                    <i class="material-icons dropdown-button right" data-activates='dropdown-{{user.id}}' data-beloworigin="false">more_vert</i>
+                  </div>
+                </div>
+              </a>
+
+              <ul id='dropdown-{{user.id}}' class='dropdown-content'>
+                {% if user.id == current_user.id %}
+                  <li><a href="#!" onclick="Materialize.toast('Unable to delete', 4000)">Delete</a></li>
+                {% else %}
+                  <Form method="POST" id="form-{{user.id}}">
+                    <input value = "{{user.id}}" type="hidden" name="user-to-delete">
+                    <li><a href="#!" onclick="document.getElementById('form-{{user.id}}').submit();">Delete</a></li>
+                  </Form>
+                {% endif %}
+              </ul>
+            {% endfor %}
+          </div>
+          {% else %}
+            <h5>No guests registered</h5>
+          {% endif %}
+        </div>
+
+        {% for heading, section in sections %}
+        <p><div class="divider"></div></p>
+        <div class="section">
+          <h2> {{heading}} </h2>
+          <ul class="collapsible popout" data-collapsible="accordion">
+            {% if section %}
+            {% for course, offerings in section|dictsort %}
+              <li>
+                <div class="collapsible-header{%if loop.index==1%} active{%endif%} course " id="{{course}}">{{ course }}</div>
+                {% if offerings %}
+                {% for offering, surveys in offerings|dictsort %}
+                  <div class="collapsible-body no-padding">
+                    <ul class="collapsible z-depth-0" data-collapsible="accordion" style="border: none;">
+                      <li>
+                        <div class="collapsible-header" id="{{course}}{{offering}}" style="border: none;">
+                          <i class="material-icons">expand_more</i>
+                          {{ offering }}
+                        </div>
+                        <div class="collapsible-body no-padding" style="border: none;">
+                          {% if surveys %}
+                          {% for survey in surveys %}
+                            <ul class="collection">
+                              <Form method="POST" id="permissions-{{survey.id}}">
+                              <a href="{%if heading=='Review surveys'%}{{url_for('survey_review.survey_review', course=survey.offering.course_name, offering=survey.offering.semester, id=survey.id)}}{%elif heading=='Open surveys'%}{{url_for('survey_respond.survey_respond', id=survey.id)}}{%elif heading=='Closed surveys'%}{{url_for('survey_metrics.survey_metrics', course=survey.offering.course_name, offering=survey.offering.semester, id=survey.id)}}{%endif%}" class="collection-item">
+                                <div class="row" style="margin-bottom: 0px;">
+                                  <div class="col s10" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                                    {{ survey.title }}
+                                  </div>
+                                  <div class="col s2">
+                                    <i class="material-icons dropdown-button right" data-activates="dropdown-{{survey.id}}" data-beloworigin="false">more_vert</i>
+                                    {% if survey.phase == 'open' or survey.phase == 'closed' %}
+                                    <!-- Switch for survey permissions -->
+                                    <div class="switch right tooltipped" data-position="left" data-delay="0" data-tooltip="{%if survey.phase=='open'%}open{%else%}closed{%endif%}">
+                                      <label>
+                                        <input value = "{{survey.id}}" type="hidden" name="survey-permissions">
+                                        
+                                        <input type="checkbox" {%if survey.phase=='open'%}checked="checked"{%endif%} name="survey-permissions" onclick="clickHandler('permissions-{{survey.id}}',1000);">
+                                        <span class="lever"></span>
+                                      </label>
+                                    </div>
+                                    {% endif %}
+                                  </div>
+                                </div>
+                              </a>
+                              </Form>
+                              <ul id="dropdown-{{survey.id}}" class='dropdown-content'>
+                                <li><a href="#!">Edit</a></li>
+                                <Form method="POST" id="form-{{survey.id}}">
+                                  <input value = "{{survey.id}}" type="hidden" name="survey-to-delete">
+                                  <li><a href="#!" onclick="document.getElementById('form-{{survey.id}}').submit();">Delete</a></li>
+                                </Form>
+                              </ul>
+                            </ul>
+                          {% endfor %}
+                          {% else %}
+                            <ul class="collection">
+                              <a href="{{url_for('survey_setup.survey_setup')}}" class="collection-item">Add new survey</a>
+                            </ul>
+                          {% endif %}
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                {% endfor %}
+                {% else %}
+                  <div class="collapsible-body no-padding">
+                    <ul class="collapsible z-depth-0" data-collapsible="accordion" style="border: none;">
+                      <li>
+                        <div class="collapsible-header" id="{{course}}" style="border: none;">
+                          <i class="material-icons">expand_more</i>
+                          No surveys available
+                        </div>
+                        <div class="collapsible-body no-padding" style="border: none;">
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                {% endif %}
+              </li>
+            {% endfor %}
+            {% else %}
+              <h5>No surveys available</h5>
+            {% endif %}
+          </ul>
+        </div>
+        {% endfor %}
+
+        </div>
+      </div>
+    </main>
+    <p>
+    {% include "footer.html" %}
+  </body>
+</html>
+
+  
+

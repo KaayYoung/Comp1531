@@ -1,0 +1,206 @@
+<!doctype html>
+<html>
+  <head>
+  <title>Survey creation</title>
+  {% include "head.html" %}
+  <style>
+    .collection {
+      overflow: visible;
+    }
+  </style>
+  </head>
+  <body>
+
+    {% include "header.html" %}
+    <main>
+      <div class="container">
+        <Form method="POST" id="new-survey">
+          <div class="row">
+            <div class="col s12">
+              <input placeholder="Untitled Survey" name="survey_title" type="text" required="" class="validate" style="font-size: 50px; margin-top: 40px" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="input-field col s6">
+              {% if predetermined_course_name is none or predetermined_course_name is not defined %}
+              <select name="survey_course" id="survey_course" required>
+                <option value="" disabled selected>Choose your option</option>
+                {% for course in courses|sort(attribute='name') %}
+                  <option value="{{course.name}}">{{course.name}}</option>
+                {% endfor %}
+              </select>
+              {% else %}
+              <input name="survey_course" value="{{predetermined_course_name}}" type="hidden" />
+              <select name="survey_course" id="survey_course" required disabled>
+                <option value="{{predetermined_course_name}}">{{predetermined_course_name}}</option>
+              </select>
+              {% endif %}
+              <label>Course</label>
+            </div>
+
+            <div class="input-field col s6">
+              {% if predetermined_course_offering is none or predetermined_course_offering is not defined %}
+              <select name="survey_offering" id="survey_offering" required disabled>
+                <option value="" disabled selected>Choose your option</option>
+                  {% for course in courses %}
+                    <option value="{{course.name}}">{{course.name}}</option>
+                  {% endfor %}
+              </select>
+              {% else %}
+              <input name="survey_offering" value="{{predetermined_course_offering}}" type="hidden" />
+              <select name="survey_offering" id="survey_offering" required disabled>
+                <option value="{{predetermined_course_offering}}">{{predetermined_course_offering}}</option>
+              </select>
+              {% endif %}
+              <label>Offering</label>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="input-field col s6">
+              <input name="start_date" id="start_date" type="text" class="datepicker" required="">
+              <label>Start date</label>
+            </div>
+            <div class="input-field col s6">
+              <input name="end_date" id="end_date" type="text" class="datepicker" required="">
+              <label>End date</label>
+            </div>
+          </div>
+
+          <p>
+          <a href="{{url_for('questions.questions')}}" class="waves-effect waves-light btn">Question pool</a>
+          <p>
+          <div class="divider"></div>
+
+          <h3>Mandatory questions</h3>
+          <div id="question-pool-mandatory" class="collection">
+            {% for question in questions %}
+              {% if question.mandatory == 1 %}
+              <a href="#!" class="collection-item" id="question-{{question.id}}">
+                <div class="row valign-wrapper" style="margin-bottom: 0px">
+                  <div class="col s10">
+                    <input type="checkbox" class="filled-in" id="box-{{question.id}}" name="question" value="{{question.id}}"/>
+                    <label for="box-{{question.id}}">{{ question.question }}</label>
+                  </div>
+                  <div class="col s2" id="select-{{question.id}}" style="visibility: hidden; height: 50px">
+                    <select name="question_type" id="question_type" value="{{question.id}}">
+                      <option value="" disabled selected>Question type</option>
+                      {% for type in question_types|sort() %}
+                        <option value="{{question.id}}-{{type}}">{{question_types[type]}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+              </a>
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          <br><br>
+          <h3>Optional questions</h3>
+          <div id="question-pool-optional" class="collection">
+            {% for question in questions %}
+            {% if question.mandatory == 0 %}
+            <a href="#!" class="collection-item" id="question-{{question.id}}">
+              <div class="row valign-wrapper" style="margin-bottom: 0px">
+                <div class="col s10">
+                  <input type="checkbox" class="filled-in" id="box-{{question.id}}" name="question" value="{{question.id}}"/>
+                  <label for="box-{{question.id}}">{{ question.question }}</label>
+                </div>
+                <div class="col s2" id="select-{{question.id}}" style="visibility: hidden; height: 50px">
+                  <select name="question_type" id="question_type" value="{{question.id}}">
+                    <option value="" disabled selected>Question type</option>
+                    {% for type in question_types|sort() %}
+                      <option value="{{question.id}}-{{type}}">{{question_types[type]}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </a>
+            {% endif %}
+            {% endfor %}
+          </div>
+
+          <button id="submit-button" class="waves-effect waves-light btn right" type="submit" name="submit">Submit</button>
+        </Form>
+
+        <script>
+          $(document).ready(function() {
+            // Gets offerings dict so offerings[course] returns list
+            var offerings = {{ offerings | tojson }}
+
+            $('select').material_select();
+            $("#survey_course").change(function() {
+              $("#survey_offering").prop("disabled", false);
+              $('select').material_select();
+              // Clears contents and returns handler for offerings dropdown
+              var $offerings_dropdown = $("#survey_offering").empty().html(' ');
+              // Sets up new options
+              var new_options_offerings = '<option value="" disabled selected>Choose your option</option>'
+              var course_selected = $('#survey_course').val();
+              // Appends offerings for selected course to new options
+              offerings[course_selected].forEach(function(offering) {
+                new_options_offerings += '<option value="' + offering + '">' + offering + '</option>'
+              })
+              $offerings_dropdown.append(new_options_offerings);
+
+              // Flags that content has been changed and needs to be updated
+              $offerings_dropdown.trigger('contentChanged');
+            });
+
+            // Uses previous flag to trigger reinitialization
+            $('select').on('contentChanged', function() {
+              // re-initialize (update)
+              $(this).material_select();
+            });
+
+            $('.datepicker').pickadate({
+              selectMonths: true, // Creates a dropdown to control month
+              selectYears: 15, // Creates a dropdown of 15 years to control year,
+              today: 'Today',
+              clear: 'Clear',
+              close: 'Ok',
+              closeOnSelect: false // Close upon selecting a date,
+            });
+
+            {% for question in questions %}
+            $('#box-{{question.id}}').click(function() {
+              if($('#select-{{question.id}}').css('visibility') == 'hidden') {
+                $('#select-{{question.id}}').css({opacity: 0.0, visibility: "visible"}).animate({opacity: 1.0});
+              } else {
+                $('#select-{{question.id}}').css({opacity: 1.0, visibility: "hidden"}).animate({opacity: 0.0});
+                $('#select-{{question.id}}').css('visibility','hidden');
+              }
+            });
+            {% endfor %}
+          });
+
+          function checkDate() {
+            if($('.datepicker').val() == '') {
+              $('.datepicker').addClass('invalid')
+            } else {
+              $('.datepicker').removeClass('invalid')
+            }
+          }
+
+          $('form').submit(function() {
+            checkDate();
+            if($('.datepicker').hasClass('invalid'))
+              return false;
+          });
+
+          $('.datepicker').change(function() {
+            checkDate();
+          });
+        </script>
+
+      </div>
+    </main>
+
+    <p>
+    {% include "footer.html" %}
+
+  </body>
+
+</html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+  <head>
+  <title>{{survey.title}}</title>
+  {% include "head.html" %}
+  </head>
+  <script>
+    $(document).ready(function() {
+      $('select').material_select();
+    });
+  </script>
+  <body>
+
+    {% include "header.html" %}
+
+    <main>
+      <div class="container">
+        <h5>{{survey.offering.course_name}}/{{survey.offering.semester}}</h5>
+        <div class="row valign-wrapper">
+          <div class="col s1">
+            <i class="material-icons left" style="font-size:4.2rem; line-height:110%; margin:2.1rem 0 1.68rem 0; vertical-align: top; display: inline-flex;">assignment</i>
+          </div>
+          <div class="col s11">
+            <h1 class="page-title">{{survey.title}}</h1>
+          </div>
+        </div>
+
+        <Form method="POST">
+          <ul class="collapsible popout" data-collapsible="accordion">
+            {% for question in survey.questions %}
+              <li>
+                <div class="collapsible-header{%if loop.index==1%} active{%endif%}">{{ question.number+1 }}. {{ question.question }}{%if question.mandatory%}<div style="color: red">&nbsp;*</div>{%endif%}</div>
+                <div class="collapsible-body" style="padding-top:0px;padding-bottom:1rem;">
+                  {% if question.type == "MCQ" %}
+                    {% for option in question.options %}
+                      <p>
+                        <input name="response-{{question.number}}" type="radio" id="option-{{question.number}}/{{option.id}}" {%if question.mandatory%}required=""{%endif%} class="validate" value="{{option.id}}" />
+                        <label for="option-{{question.number}}/{{option.id}}">{{ option.option }}</label>
+                      </p>
+                    {% endfor %}
+                  {% elif question.type == "TXT" %}
+                  <div style="padding-top:10px">
+                    <div class="input-field">
+                      <textarea name="response-{{question.number}}" id="text-{{question.number}}" class="materialize-textarea" {%if question.mandatory%}required=""{%endif%}></textarea>
+                      <label for="text-{{question.number}}">Your response</label>
+                    </div>
+                  </div>
+                  {% endif %}
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+
+          <button id="submit-button" class="waves-effect waves-light btn right" type="submit" name="login">Submit</button>
+        </Form>
+
+      </div>
+    </main>
+
+    <p>
+    {% include "footer.html" %}
+
+  </body>
+
+</html>

@@ -1,0 +1,278 @@
+<!doctype html>
+<html>
+  <head>
+  <title>Metrics: {{survey.offering.course_name}}/{{survey.offering.semester}}</title>
+  {% include "head.html" %}
+  <style>
+    .collection {
+      overflow: visible;
+    }
+    .collapsible .collapsible {
+      margin: 0;
+    }
+    .collapsible-header.active i {
+      -ms-transform: rotate(180deg); /* IE 9 */
+      -webkit-transform: rotate(180deg); /* Chrome, Safari, Opera */
+      transform: rotate(180deg);
+    }
+    .course { 
+      -moz-transition: all .2s ease-in;
+      -o-transition: all .2s ease-in;
+      -webkit-transition: all .2s ease-in;
+      transition: all .2s ease-in;
+      padding: 20px;
+    }
+    .course.active {
+      background: #eee;
+    }
+  </style>
+  <script type="text/javascript" src="{{ url_for('static',filename='js/Chart.bundle.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static',filename='js/palette.js') }}"></script>
+  </head>
+  <body>
+
+    {% include "header.html" %}
+
+    <main>
+      <div class="container">
+        <h5>{{survey.offering.course_name}}/{{survey.offering.semester}} Metrics</h5>
+        <div class="row valign-wrapper">
+          <div class="col s1">
+            <i class="material-icons left" style="font-size:4.2rem; line-height:110%; margin:2.1rem 0 1.68rem 0; vertical-align: top; display: inline-flex;">assignment</i>
+          </div>
+          <div class="col s11">
+            <h3 class="page-title">{{survey.title}}</h3>
+          </div>
+        </div>
+
+        <div class="progress tooltipped" data-position="top" data-delay="0" data-tooltip="{{(100 * survey.completions.all()|length / survey.offering.enrolments.all()|length)|round(2)}}% completion rate">
+          <div class="determinate" style="width: {{100 * survey.completions.all()|length / survey.offering.enrolments.all()|length}}%"></div>
+        </div>
+
+        <div id="canvas-container" style="overflow: hidden;">
+          <canvas id="chart-container"></canvas>
+        </div>
+
+        <div class="card">
+          <div class="card-tabs">
+            <ul class="tabs grey lighten-4">
+              {% for question in survey.questions %}
+                <li id="tab-{{question.number+1}}" class="tab" data-chart="data{{question.number}}"><a {%if question.id == 0%}class="active"{%endif%} href="#{{question.number+1}}">q{{question.number+1}}</a></li>
+              {% endfor %}
+              <li id="tab-completions" class="tab"><a href="#completions">Completions</a></li>
+            </ul>
+          </div>
+          <div class="card-content">
+            {% for question in survey.questions %}
+              <div id="{{question.number+1}}">
+                <div id="header-{{question.id}}" class="row" style="margin: 0px; padding: 0px;">
+                  <div class="col s11" style="padding-left: 0px;">
+                    <h5>{{question.question}}{%if question.mandatory%}<div style="color: red; display: inline-block;">&nbsp;*</div>{%endif%}</h5>
+                  </div>
+                  <div class="col s1 grey-text text-lighten-2" >
+                    <h5>{{question.type}}</h5>
+                  </div>
+                </div>
+                <table id="table-{{question.id}}" class="highlight">
+                  <thead>
+                    <tr>
+                        <th>Response</th>
+                        <th>Frequency</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% if responses[question.id].items() %}
+                    {% for response, frequency in responses[question.id].items() %}
+                    <tr>
+                      <td>{{ response }}</td>
+                      <td>{{ frequency }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                      <td colspan="2">No responses</td>
+                    </tr>
+                    {% endif %}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td><b>Completion</b></td>
+                      <td>{{responses[question.id]|length}}/{{survey.offering.enrolments.all()|length}}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            {% endfor %}
+            <div id="completions">
+              <div id="content-completions" class="row" style="margin: 0px; padding: 0px;">
+                {% if current_user.admin %}
+
+                <table class="highlight">
+                  <thead>
+                    <tr>
+                        <th>Uncompleted (zID)</th>
+                        <th>Completed (zID)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-completions">
+                    {% if survey.completions.all() %}
+                    <tr>
+                      {% for completion in survey.offering.enrolments.all() %}
+                      {% if completion not in survey.completions.all() %}
+                      <td>{{ completion.user_id }}</td>
+                      {% endif %}
+                      {% endfor %}
+                    </tr>
+                    <tr>
+                      {% for completion in survey.completions.all() %}
+                      <td>{{ completion.user_id }}</td>
+                      {% endfor %}
+                    </tr>
+                    {% else %}
+                    <tr>
+                      <td colspan="1">No responses</td>
+                    </tr>
+                    {% endif %}
+                  </tbody>
+                </table>
+                {% else %}
+                <h5 style="margin-bottom: 20px;">
+                  <i class="material-icons left">warning</i>
+                  Details view for admin only 
+                </h5>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+      </div>
+    </main>
+
+    <script>
+      $(document).ready(function(){
+        $('.tabs').tabs({
+          swipeable : true,
+        });
+      });
+      
+      {% for question in survey.questions %}
+      var data{{question.number}} = {
+        labels: [{% for response, frequency in responses[question.id].items() %}"{{response}}",{% endfor %}],
+        datasets: [{
+            data: [{% for response, frequency in responses[question.id].items() %}{{frequency}},{% endfor %}],
+            backgroundColor: palette('tol-dv', {{responses[question.id]|length}}).map(function(hex) {return '#' + hex;})
+        }]
+      };
+      {% endfor %}
+
+      var canvasContainer = $("#canvas-container");
+      var chartContainer = $("#chart-container");
+      var chart;
+      function createChart(data, isFirstCall) {
+        var oldHeight = chartContainer.height()
+        var pos = $(document).scrollTop();
+        // If at top of page and clicked next q
+        if($(document).scrollTop() === 0 && !isFirstCall) {
+          $('html, body').animate({
+            scrollTop: canvasContainer.offset().top
+          }, 750);
+        }
+
+        // If there aren't any responses
+        if(data.labels.length < 1) {
+          // Collapses the chart canvas
+          oldHeight = canvasContainer.height()
+          // chartContainer.fadeOut()
+          canvasContainer.animate({
+            height: '0px'
+          }, 750);
+        } else {
+          if(chart) {
+            // chartContainer.fadeIn()
+            canvasContainer.animate({
+              height: oldHeight
+            }, 750);
+            chart.destroy();
+          }
+          chart = new Chart(chartContainer, {
+            type: 'pie',
+            data: data,
+            options: {
+              title: {
+                  display: false,
+                  fontSize: 50,
+                  text: 'Chart Title'
+              }
+            }
+          });
+        }
+        $(document).scrollTop(pos); 
+      }
+
+      $(document).ready(function() {
+        createChart(data0, true);
+        // Inverts completions table - borrowed from https://stackoverflow.com/a/16127030
+        $("#table-completions").each(function() {
+            var $this = $(this);
+            var newrows = [];
+            $this.find("tr").each(function(){
+                var i = 0;
+                $(this).find("td").each(function(){
+                    i++;
+                    if(newrows[i] === undefined) { newrows[i] = $("<tr></tr>"); }
+                    newrows[i].append($(this));
+                });
+            });
+            $this.find("tr").remove();
+            $.each(newrows, function(){
+                $this.append(this);
+            });
+        });
+      });
+
+      $('.tab').on('click', function() {
+        if($(this).attr('id') != 'tab-completions') {
+          createChart(eval($(this).data('chart')), false);
+        } else {
+          // Hides chart
+          createChart({labels:[], datasets:{data:[]}}, false);          
+        }
+      });
+
+      // Programically resize card based on table height
+      {% for question in survey.questions %}
+      function resize_{{question.number+1}}() {
+        var tabHeight = $('#header-{{question.id}}').height() + $('#table-{{question.id}}').height()
+        $('.tabs-content').animate({height:tabHeight})
+      }
+      $('#tab-{{question.number+1}}').click(function(){
+        resize_{{question.number+1}}()
+      });
+      
+      // Resizes init to first one = active one
+      {% if question.number == 0 %}
+      $(document).ready(function() {
+        resize_{{question.number+1}}()
+      });
+      {% endif %}
+      {% endfor %}
+
+      // Shows stats on who's completed and who hasn't
+      function resize_completions() {
+        var tabHeight = $('#content-completions').height()
+        $('.tabs-content').animate({height:tabHeight})
+      }
+      $('#tab-completions').click(function(){
+        resize_completions()
+      });
+    </script>
+
+    <p>
+    {% include "footer.html" %}
+
+  </body>
+
+</html>

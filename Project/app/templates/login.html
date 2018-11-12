@@ -1,0 +1,237 @@
+<!doctype html>
+<html>
+  <head>
+  <title>Login page</title>
+  {% include "head.html" %}
+  <style>
+    #login-button {
+      left: 55px;
+    }
+    #register-button {
+      left: 55px;
+    }
+    .row {
+      margin-left: 0px !important;
+      margin-right: 0px !important;
+      margin-bottom: 0px !important;
+    }
+    .tabs-content.carousel {
+      width: 100%;
+      height: 100%;
+      overflow: visible; 
+      /*overflow-y: visible !important;*/
+      /*overflow-y: hidden;*/
+    }
+    .tabs-content.carousel .carousel-item {
+      overflow: visible; 
+      /*overflow-x: hidden;*/
+    }
+  </style>
+  </head>
+  <body>
+
+    {% include "header.html" %}
+
+    <main>
+      <div class="container">
+        <h1> Login page </h1>
+
+        <div class="card">
+          <div class="card-content">
+            <p>Content requires authorisation, log in with:</p>
+            <blockquote>
+            <p>'1' and 'admin' for admin,</p>
+            <br>
+            <p>'50' and 'staff670' for staff → COMP4931 18s1</p> 
+            <p>'100' and 'student228' for student → COMP9517 17s2</p>
+
+            <br>
+            <p>'1075' and 'staff1075' for staff → COMP9844 18s1</p>
+            <p>'145' and 'student839' for student → COMP9844 18s1</p>
+            </blockquote>
+            <p>to test correct input validation, and something else to test
+               login rejection.</p>
+            <!-- Modal Trigger -->
+            <a id="lookup_btn" class="waves-effect waves-teal btn-flat modal-trigger right" href="#lookup">Lookup users</a>
+          </div>
+          <div class="card-tabs">
+            <ul class="tabs tabs-fixed-width">
+              <li class="tab"><a class="active" href="#login" id="login-tab">Login</a></li>
+              <li class="tab"><a href="#register" id="register-tab">Register</a></li>
+            </ul>
+          </div>
+          <div class="card-content grey lighten-4" style="overflow: visible;">
+
+            <div id="login" class="tabs-content">
+              <Form method="POST">
+                <div class="row">
+                  <div class="input-field col s12">
+                    <i class="material-icons prefix">account_circle</i>
+                    <input name="zID" id="zID" type="text" required="" class="validate" {%if zid%}value={{zid}}{%endif%}>
+                    <label for="name">Enter your zID</label>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="input-field col s12">
+                    <i class="material-icons prefix">lock</i>
+                    <input name="password" id="password" type="password" required="" class="validate" {%if password%}value={{password}}{%endif%}>
+                    <label for="password">Enter your password</label>
+                  </div>
+                </div>
+
+                <button id="login-button" class="waves-effect waves-light btn" type="submit" name="login">Login</button>
+
+              </Form>
+            </div>
+
+            <div id="register" class="tabs-content">
+              <Form method="POST">
+                <div class="row">
+                  <div class="input-field col s6">
+                    <i class="material-icons prefix">account_circle</i>
+                    <input name="zID-reg" id="zID-reg" type="text" required="" class="validate" {%if zid_reg%}value={{zid_reg}}{%endif%}>
+                    <label for="zID-reg">Enter your zID</label>
+                  </div>
+
+                  <div class="input-field col s6">
+                    <i class="material-icons prefix">lock</i>
+                    <input name="password-reg" id="password-reg" type="password" required="" class="validate" {%if password_reg%}value={{password_reg}}{%endif%}>
+                    <label for="password-reg">Enter your password</label>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="input-field col s6">
+                    <i class="material-icons prefix">school</i>
+                    {% if predetermined_course_name is none or predetermined_course_name is not defined %}
+                    <select name="course" id="course" required="">
+                      <option value="" disabled selected>Choose your option</option>
+                      {% for course in courses|sort(attribute='name') %}
+                        <option value="{{course.name}}">{{course.name}}</option>
+                      {% endfor %}
+                    </select>
+                    {% else %}
+                    <input name="course" value="{{predetermined_course_name}}" type="hidden" />
+                    <select name="course" id="course" required="" disabled>
+                      <option value="{{predetermined_course_name}}">{{predetermined_course_name}}</option>
+                    </select>
+                    {% endif %}
+                    <label>Course</label>
+                  </div>
+
+                  <div class="input-field col s6">
+                    <i class="material-icons prefix">date_range</i>
+                    {% if predetermined_course_offering is none or predetermined_course_offering is not defined %}
+                    <select name="offering" id="offering" required="" disabled>
+                      <option value="" disabled selected>Choose your option</option>
+                        {% for course in courses %}
+                          <option value="{{course.name}}">{{course.name}}</option>
+                        {% endfor %}
+                    </select>
+                    {% else %}
+                    <input name="offering" value="{{predetermined_course_offering}}" type="hidden" />
+                    <select name="offering" id="offering" required="" disabled>
+                      <option value="{{predetermined_course_offering}}">{{predetermined_course_offering}}</option>
+                    </select>
+                    {% endif %}
+                    <label>Offering</label>
+                  </div>
+                </div>
+
+                <button id="register-button" class="waves-effect waves-light btn tooltipped" type="submit" name="register" data-position="right" data-delay="0" data-tooltip="Requires admin activation">Register</button>
+
+              </Form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <p>
+    {% include "footer.html" %}
+
+    {% include "lookup-modal.html" %}
+
+    <script>
+      $(document).ready(function() {
+        $('.tabs').tabs({
+          swipeable : false,
+        });
+        {% if zid_reg %}
+          $('#register-tab').trigger('click');
+        {% endif %}
+
+        // Gets offerings dict so offerings[course] returns list
+        var offerings = {{ offerings | tojson }}
+
+        $('select').material_select();
+        $("#course").change(function() {
+          $("#offering").prop("disabled", false);
+          $('select').material_select();
+          // Clears contents and returns handler for offerings dropdown
+          var $offerings_dropdown = $("#offering").empty().html(' ');
+          // Sets up new options
+          var new_options_offerings = '<option value="" disabled selected>Choose your option</option>'
+          var course_selected = $('#course').val();
+          // Appends offerings for selected course to new options
+          offerings[course_selected].forEach(function(offering) {
+            new_options_offerings += '<option value="' + offering + '">' + offering + '</option>'
+          })
+          $offerings_dropdown.append(new_options_offerings);
+
+          // Flags that content has been changed and needs to be updated
+          $offerings_dropdown.trigger('contentChanged');
+        });
+
+        // Uses previous flag to trigger reinitialization
+        $('select').on('contentChanged', function() {
+          // re-initialize (update)
+          $(this).material_select();
+        });
+
+        $('.datepicker').pickadate({
+          selectMonths: true, // Creates a dropdown to control month
+          selectYears: 15, // Creates a dropdown of 15 years to control year,
+          today: 'Today',
+          clear: 'Clear',
+          close: 'Ok',
+          closeOnSelect: false // Close upon selecting a date,
+        });
+
+        {% for question in questions %}
+        $('#box-{{question.id}}').click(function() {
+          if($('#select-{{question.id}}').css('visibility') == 'hidden') {
+            $('#select-{{question.id}}').css({opacity: 0.0, visibility: "visible"}).animate({opacity: 1.0});
+          } else {
+            $('#select-{{question.id}}').css({opacity: 1.0, visibility: "hidden"}).animate({opacity: 0.0});
+            $('#select-{{question.id}}').css('visibility','hidden');
+          }
+        });
+        {% endfor %}
+      });
+
+      function checkDate() {
+        if($('.datepicker').val() == '') {
+          $('.datepicker').addClass('invalid')
+        } else {
+          $('.datepicker').removeClass('invalid')
+        }
+      }
+
+      $('form').submit(function() {
+        checkDate();
+        if($('.datepicker').hasClass('invalid'))
+          return false;
+      });
+
+      $('.datepicker').change(function() {
+        checkDate();
+      });
+
+    </script>
+
+  </body>
+
+</html>

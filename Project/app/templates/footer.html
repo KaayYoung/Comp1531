@@ -1,0 +1,35 @@
+<footer class="page-footer">
+  <div class="container">
+    <div class="row">
+      <div class="col l4 offset-l2 s6">
+        <h5 class="white-text">Contributors</h5>
+        <ul id="contributors">
+          <p class="grey-text text-lighten-3">Jeremy Fu</p>
+          <p class="grey-text text-lighten-3">Thomas Little</p>
+          <p class="grey-text text-lighten-3">Randy Tjang</p>
+          <p class="grey-text text-lighten-3">Jingshi Yang</p>
+        </ul>
+        <script>
+          var ul = document.getElementById('contributors');
+          for (var i = ul.children.length; i >= 0; i--) {
+              ul.appendChild(ul.children[Math.random() * i | 0]);
+          }
+        </script>
+      </div>
+      <div class="col l4 offset-l2 s6">
+        <h5 class="white-text">Attributions</h5>
+        <ul>
+          <p><a href="http://materializecss.com/" class="grey-text text-lighten-3">Materialize CSS</a></p>
+          <p><a href="http://www.chartjs.org/" class="grey-text text-lighten-3">Chart.js</a></p>
+          <a href="https://supraniti.github.io/Lean-Mean-Drag-and-Drop/" class="grey-text text-lighten-3">Lean Mean Drag and Drop</a></p>
+          <a href="https://refreshless.com/nouislider/" class="grey-text text-lighten-3">noUiSlider</a></p>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-copyright">
+    <div class="container">
+    © {{ now.year }} Copyright
+    </div>
+  </div>
+</footer>

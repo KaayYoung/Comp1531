@@ -1,0 +1,215 @@
+<!doctype html>
+<html>
+  <head>
+  <title>Debugger</title>
+  {% include "head.html" %}
+  <style>
+    .collection {
+      overflow: visible;
+    }
+  </style>
+  <link href="{{ url_for('static',filename='css/nouislider.custom.min.css') }}" rel="stylesheet">
+  </head>
+  <body>
+
+    {% include "header.html" %}
+
+    <main>
+      <div class="container">
+        <h1 class="page-title"> Debugger </h1>
+        <!-- Modal Trigger -->
+        <a id="lookup_btn" class="waves-effect waves-teal btn-flat modal-trigger right" href="#lookup">Lookup users</a>
+
+        <div class="row">
+          <div class="col s12">
+            <Form method="POST" id="survey-generator">
+              <ul id="list" class="collection">
+                <li class="collection-item">
+                  <div class="row">
+                    <div class="col s12">
+                      <h5>Survey generator</h5>
+                      <div class="divider"></div>
+                    </div>
+                  </div>
+
+                  <input id="s-lo" name="s-lo" type="hidden"/>
+                  <input id="s-hi" name="s-hi" type="hidden"/>
+
+                  <input id="q-lo" name="q-lo" type="hidden"/>
+                  <input id="q-hi" name="q-hi" type="hidden"/>
+
+                  <input id="r-lo" name="r-lo" type="hidden"/>
+                  <input id="r-hi" name="r-hi" type="hidden"/>
+
+                  <div class="row">
+                    <div class="col s12">
+                      <label for="s-to-gen">Number of surveys to generate:</label>
+                      <label id="s-to-gen-lo" for="s-to-gen"></label>
+                      <label for="s-to-gen">-</label>
+                      <label id="s-to-gen-hi" for="s-to-gen"></label>
+                      <p>
+                        <div id="s-to-gen"></div>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col s6">
+                      <label for="q-to-gen">Range of questions to generate per survey:</label>
+                      <label id="q-to-gen-lo" for="q-to-gen"></label>
+                      <label for="q-to-gen">-</label>
+                      <label id="q-to-gen-hi" for="q-to-gen"></label>
+                      <p>
+                        <div id="q-to-gen"></div>
+                      </p>
+                    </div>
+                    <div class="col s6">
+                      <label for="r-to-gen">Range of responses to generate per question:</label>
+                      <label id="r-to-gen-lo" for="r-to-gen"></label>
+                      <label for="r-to-gen">-</label>
+                      <label id="r-to-gen-hi" for="r-to-gen"></label>
+                      <p>
+                        <div id="r-to-gen"></div>
+                      </p>
+                    </div>
+                  </div>
+
+                  <input name="overwrite" type="checkbox" class="filled-in" id="s-overwrite" />
+                  <label for="s-overwrite">Overwrite existing</label>
+
+                  <span class="badge">{{surveys|length}} surveys in DB</span>
+
+                </li>
+              </ul>
+              <div class="progress" id="survey-progress" style="display: none;">
+                <div class="indeterminate"></div>
+              </div>
+              <button id="gen-surveys" class="waves-effect waves-light btn" type="submit" name="gen-surveys" onclick="Materialize.toast($('<i class=\'material-icons left\'>timelapse</i><a href=\'index\' target=\'_blank\' class=\'white-text\'>Generation may take a long time</a>'), 10000)">Generate</button>
+            </Form>
+          </div>
+        </div>
+
+        <p><h1></h1></p>
+
+        <div class="row">
+          <div class="col s12">
+            <Form method="POST" id="question-generator">
+              <ul id="list" class="collection">
+                <li class="collection-item">
+                  <div class="row">
+                    <div class="col s12">
+                      <h5>Question pool generator</h5>
+                      <div class="divider"></div>
+                    </div>
+                  </div>
+
+                  <input id="qp-lo" name="qp-lo" type="hidden"/>
+                  <input id="qp-hi" name="qp-hi" type="hidden"/>
+
+                  <div class="row">
+                    <div class="col s12">
+                      <label for="qp-to-gen">Number of questions to generate:</label>
+                      <label id="qp-to-gen-lo" for="qp-to-gen"></label>
+                      <label for="qp-to-gen">-</label>
+                      <label id="qp-to-gen-hi" for="qp-to-gen"></label>
+                      <p>
+                        <div id="qp-to-gen"></div>
+                      </p>
+                    </div>
+                  </div>
+
+                  <input name="overwrite" type="checkbox" class="filled-in" id="q-overwrite" />
+                  <label for="q-overwrite">Overwrite existing</label>
+
+                  <span class="badge">{{questions|length}} questions in DB</span>
+
+                </li>
+              </ul>
+              <button id="gen-questions" class="waves-effect waves-light btn" type="submit" name="gen-questions">Generate</button>
+            </Form>
+          </div>
+
+          <Form method="POST" id="reset-db-form">
+            <input id="reset-db" name="reset-db" value="True" type="hidden"/>
+            <a id="reset-db-button" class="waves-effect waves-light btn right red" onclick="Materialize.Toast.removeAll();Materialize.toast($('<i class=\'material-icons left\'>warning</i><a class=\'white-text\'>All data will be lost</a><button class=\'btn-flat toast-action white-text\' onclick=\'document.getElementById(&quot;reset-db-form&quot;).submit();\'>Confirm</button>'), 10000, 'red darken-4');">Reset database</a>
+          </Form>
+        </div>
+
+      </div>
+    </main>
+
+    <script src="{{ url_for('static',filename='js/nouislider.custom.min.js') }}"></script>
+    <script>
+      function sliderInit(slider, loInput, hiInput, minVal, maxVal, loInit, hiInit, id) {
+        noUiSlider.create(slider, {
+          start: [loInit, hiInit],
+          connect: true,
+          step: 1.0,
+          orientation: 'horizontal', // 'horizontal' or 'vertical'
+          range: {
+            'min': minVal,
+            'max': maxVal
+          },
+          format: wNumb({
+            decimals: 0
+          })
+        });
+
+        slider.noUiSlider.on('update', function( values, handle ) {
+          var value = values[handle];
+          if ( handle ) {
+            hiInput.value = value;
+            document.getElementById(id + '-hi').innerHTML = value
+          } else {
+            loInput.value = value;
+            document.getElementById(id + '-lo').innerHTML = value
+          }
+        });
+
+        hiInput.addEventListener('change', function(){
+          slider.noUiSlider.set([null, this.value]);
+        });
+
+        loInput.addEventListener('change', function(){
+          slider.noUiSlider.set([this.value, null]);
+        });
+      }
+
+      var sSlid = document.getElementById('s-to-gen');
+      var sLo = document.getElementById('s-lo');
+      var sHi = document.getElementById('s-hi');
+
+      var qSlid = document.getElementById('q-to-gen');
+      var qLo = document.getElementById('q-lo');
+      var qHi = document.getElementById('q-hi');
+
+      var oSlid = document.getElementById('r-to-gen');
+      var oLo = document.getElementById('r-lo');
+      var oHi = document.getElementById('r-hi');
+
+      sliderInit(sSlid, sLo, sHi, 0, 1000, 100, 500, 's-to-gen')
+      sliderInit(qSlid, qLo, qHi, 0, 20, 3, 10, 'q-to-gen')
+      sliderInit(oSlid, oLo, oHi, 0, 100, 10, 40, 'r-to-gen')
+      // oSlid.setAttribute('disabled', true);
+
+
+      var qpSlid = document.getElementById('qp-to-gen');
+      var qpLo = document.getElementById('qp-lo');
+      var qpHi = document.getElementById('qp-hi');
+
+      sliderInit(qpSlid, qpLo, qpHi, 0, 500, 100, 150, 'qp-to-gen')
+
+      $(document).ready(
+      function() {
+        $("#gen-surveys").click(function() {
+            $("#survey-progress").fadeToggle();
+        });
+      });
+    </script>
+    <p>
+    {% include "footer.html" %}
+    {% include "lookup-modal.html" %}
+
+  </body>
+
+</html>

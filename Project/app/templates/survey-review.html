@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+  <head>
+  <title>Survey creation</title>
+  {% include "head.html" %}
+  <style>
+    .collection {
+      overflow: visible;
+    }
+  </style>
+  </head>
+  <body>
+
+    {% include "header.html" %}
+
+    <main>
+      <div class="container">
+        <Form method="POST" id="new-survey">
+          <div class="row">
+            <div class="col s12">
+              <input value="{{survey.title}}" disabled name="survey_title" type="text" required="" class="validate" style="font-size: 50px; margin-top: 40px" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="input-field col s6">
+              <input name="survey_course" value="{{course.name}}" type="hidden"/>
+              <select id="survey_course" required="" disabled>
+                <option value="{{course.name}}" selected>{{course.name}}</option>
+                </select>
+              <label>Course</label>
+            </div>
+            <div class="input-field col s6">
+              <input name="survey_offering" value="{{offering.semester}}" type="hidden"/>
+              <select id="survey_offering" required="" disabled>
+                <option value="{{offering.semester}}" selected>{{offering.semester}}</option>
+              </select>
+              <label>Offering</label>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="input-field col s6">
+              <input value="{{start_date}}" disabled name="start_date" id="start_date" type="text" class="datepicker">
+              <label>Start date</label>
+            </div>
+            <div class="input-field col s6">
+              <input value="{{end_date}}" disabled name="end_date" id="end_date" type="text" class="datepicker">
+              <label>End date</label>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h3>Selected questions</h3>
+          <div id="question-pool-selected" class="collection">
+            {% for question in survey.questions %}
+            <a href="#!" class="collection-item">
+            <div class="row valign-wrapper" style="margin-bottom: 0px">
+              <div class="col s9">
+                {% if question.mandatory %}
+                  <input name="question_from_before" value="{{question.id}}-{{question.question}}" type="hidden" />
+                  <input type="checkbox" class="filled-in" id="box-{{question.id}}" checked disabled />
+                {% else %}
+                  <input name="question_from_before" type="checkbox" class="filled-in" id="box-{{question.id}}" value="{{question.id}}-{{question.question}}" checked />
+                {% endif %}
+                <label for="box-{{question.id}}">{{ question.question }}</label>
+              </div>
+              <div class="col s1 valign-wrapper">
+                <!-- <i class="material-icons" style="margin-top: 10px"> -->
+                <div class="valign" style="color: red; font-size: 2em;">
+                  {% if question.mandatory %}
+                    <!-- priority_high -->
+                    *
+                  {% endif %}
+                </div>
+                <!-- </i> -->
+              </div>
+              <div class="col s2">
+                <input name="question_type_from_before" value="{{question.id}}-{{question.type}}" type="hidden" />
+                <select id="question_type" disabled>
+                  <option value="{{question.id}}-{{question.type}}" selected>{{question.type}}</option>
+                </select>
+              </div>
+            </div>
+            </a>
+            {% endfor %}
+          </div>
+
+          <br><br>
+          <h3>Optional questions</h3>
+          <div id="question-pool-optional" class="collection">
+            {% if questions %}
+            {% for question in questions %}
+            <a href="#!" class="collection-item" id="questionpool-{{question.id}}">
+              <div class="row valign-wrapper" style="margin-bottom: 0px">
+                <div class="col s10">
+                  <input type="checkbox" class="filled-in" id="boxpool-{{question.id}}" name="question" value="{{question.id}}-{{question.question}}"/>
+                  <label for="boxpool-{{question.id}}">{{ question.question }}</label>
+                </div>
+                <div class="col s2" id="selectpool-{{question.id}}" style="visibility: hidden; height: 50px">
+                  <select name="question_type" id="question_type" value="{{question.id}}">
+                    <option value="" disabled selected>Question type</option>
+                    {% for type in question_types|sort() %}
+                      <option value="{{question.id}}-{{type}}">{{question_types[type]}}</option>
+                    {% endfor %}
+                  </select>
+                </div>                
+              </div>
+            </a>
+            {% endfor %}
+            {% else %}
+              <h5>No optional questions available</h5>
+            {% endif %}
+          </div>
+
+          <button id="submit-button" class="waves-effect waves-light btn right" type="submit" name="submit">Submit</button>
+        </Form>
+
+      </div>
+    </main>
+
+    <p>
+    {% include "footer.html" %}
+
+  </body>
+
+</html>
+
+<script>
+$(document).ready(function() {
+  $('select').material_select();
+  {% for question in questions %}
+  $('#boxpool-{{question.id}}').click(function() {
+    if($('#selectpool-{{question.id}}').css('visibility') == 'hidden') {
+      $('#selectpool-{{question.id}}').css({opacity: 0.0, visibility: "visible"}).animate({opacity: 1.0});
+    } else {
+      $('#selectpool-{{question.id}}').css({opacity: 1.0, visibility: "hidden"}).animate({opacity: 0.0});
+      $('#selectpool-{{question.id}}').css('visibility','hidden');
+    }
+  });
+  {% endfor %}
+});
+</script>

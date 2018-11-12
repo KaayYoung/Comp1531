@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+  <head>
+  <title>Metrics</title>
+  {% include "head.html" %}
+  <style>
+    .collection {
+      overflow: visible;
+    }
+    .collapsible .collapsible {
+      margin: 0;
+    }
+    .collapsible-header.active i {
+      -ms-transform: rotate(180deg); /* IE 9 */
+      -webkit-transform: rotate(180deg); /* Chrome, Safari, Opera */
+      transform: rotate(180deg);
+    }
+    .course { 
+      -moz-transition: all .2s ease-in;
+      -o-transition: all .2s ease-in;
+      -webkit-transition: all .2s ease-in;
+      transition: all .2s ease-in;
+      padding: 20px;
+    }
+    .course.active {
+      background: #eee;
+    }
+  </style>
+  </head>
+  <body>
+
+    {% include "header.html" %}
+
+    <main>
+      <div class="container">
+        <h1 class="page-title"> Metrics </h1>
+
+
+        <ul class="collapsible popout" data-collapsible="accordion">
+          {% for course in courses|sort(attribute='name') %}
+            <li>
+              <div class="collapsible-header{%if loop.index==1%} active{%endif%} course " id="{{course}}">{{ course.name }}</div>
+              {% if course.offerings %}
+                {% for offering in course.offerings|sort(attribute='semester') %}
+                  {% if offering.surveys and offering.id in enrolment%}
+                  <div class="collapsible-body no-padding">
+                    <ul class="collapsible z-depth-0" data-collapsible="accordion" style="border: none;">
+                      <li>
+                        <div class="collapsible-header" id="{{course.name}}{{offering.session}}" style="border: none;">
+                          <i class="material-icons">expand_more</i>
+                          {{ offering.semester }}
+                        </div>
+                        <div class="collapsible-body no-padding" style="border: none;">
+                          {% if offering.surveys %}
+                          {% for survey in offering.surveys %}
+                            <ul class="collection">
+                              <a href="{{url_for('survey_metrics.survey_metrics', course=survey.offering.course_name, offering=survey.offering.semester, id=survey.id)}}" class="collection-item">
+                                {{ survey.title }}
+                              </a>
+                            </ul>
+                          {% endfor %}
+                          {% endif %}
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                  {% endif %}
+                    
+                {% endfor %}
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+
+
+      </div>
+    </main>
+
+    <p>
+    {% include "footer.html" %}
+
+  </body>
+
+</html>

@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+  <head>
+  <title>Question pool</title>
+  {% include "head.html" %}
+  <style>
+    .collection {
+      overflow: visible;
+    }
+  </style>
+  </head>
+  <body>
+
+    {% include "header.html" %}
+
+    <main>
+      <div class="container">
+        <h1 class="page-title"> Question pool </h1>
+
+        <div id="question-pool" class="collection">
+          {% for question in questions|sort(attribute="question") %}
+            <a href="#!" class="collection-item">
+              <div class="valign-wrapper row" style="margin-bottom: 0px">
+                <!-- <i class="material-icons valign col s1"> -->
+                <div class="valign col s1" style="color: red;">
+                  {% if question.mandatory %}
+                    <!-- priority_high -->
+                    *
+                  {% endif %}
+                  </div>
+                <!-- </i> -->
+                <span class="col s11">{{ question.question }}</span>
+                <i class="material-icons dropdown-button right" data-activates="dropdown-{{question.id}}" data-beloworigin="false">more_vert</i>
+              </div>
+            </a>
+            <ul id="dropdown-{{question.id}}" class='dropdown-content'>
+              <Form method="POST" id="form-{{question.id}}">
+                <input value = "{{question.id}}" type="hidden" name="question-to-delete">
+                <li><a href="#!" onclick="document.getElementById('form-{{question.id}}').submit();">Delete</a></li>
+              </Form>
+            </ul>
+          {% endfor %}
+        </div>
+
+        <Form method="POST" id="new-question">
+
+          <ul id="list" class="collection">
+            <li class="collection-item">
+              <div class="row" style="margin-bottom: 0px">
+                <div class="input-field col s10">
+                  <input name="question-to-add" id="input" placeholder="Enter question" required="" class="validate"></input>
+                </div>
+                <div class="input-field col s2">
+                  <select name="question_mandatory" id="question_mandatory" required="">
+                    {% for mandatory_option in mandatory_options|sort(reverse=True) %}
+                      <option value="{{mandatory_option}}">{{mandatory_options[mandatory_option]}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </li>
+          </ul>
+
+          <div class="row">
+            <div class="col s6">
+              <button id="add-question" class="waves-effect waves-light btn left" type="submit" name="login">Add question</button>
+            </div>
+            <div class="col s6">
+              <a href="{{url_for('survey_setup.survey_setup')}}" class="waves-effect waves-light btn right">Create survey</a>
+            </div>
+          </div>
+        </Form>
+
+<!--         <p>
+        <div class="divider"></div>
+
+        <h3> Question lookup test: </h3>
+        <div class="chips chips-autocomplete"></div> -->
+      </div>
+
+      </div>
+      <script>
+        $(document).ready(function(){
+          $('.chips-autocomplete').material_chip({
+            /*
+            autocompleteOptions: {
+              data: {
+                {#
+                {% for key in questions.keys() %}
+                '{{questions[key]}}':null,
+                {%endfor%}
+                #}
+              },
+              limit: Infinity,
+              minLength: 1
+            }
+            */
+          });
+          $('select').material_select();
+        });
+      </script>
+    </main>
+
+    <p>
+    {% include "footer.html" %}
+
+  </body>
+
+</html>

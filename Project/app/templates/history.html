@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+  <head>
+  <title>Login history</title>
+  {% include "head.html" %}
+  </head>
+  <body>
+
+    {% include "header.html" %}
+
+    <main>
+      <div class="container">
+        <h1> Past logins </h1>
+        <div class="card">
+          <div class="card-content">
+            <table class="responsive-table highlight">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Password</th>
+                  <th>Login time</th>
+                  <th>Authorised</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if past_logins %}
+                  {% for login in past_logins %}
+                    <tr>
+                      <td>{{ login[0] }}</td>
+                      <td>{{ login[1] }}</td>
+                      <td>{{ login[2] }}</td>
+                      <td>{{ login[3] }}</td>
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td> No past logins to show </td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    {% include "footer.html" %}
+
+  </body>
+  </html>
