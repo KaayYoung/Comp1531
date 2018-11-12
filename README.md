@@ -11,6 +11,7 @@ Main Topics:
 6. Introduction to Database Design and Modelling (including SQLite3 and SQLAlchemy)                                   
 7. Development and Testing, Software Maintenance                          
 
+
 Repository includes 11 labs and 1 group project                                    
 Lab content is based on the topic of each week                              
 Group Project is Survey Review Website                                
